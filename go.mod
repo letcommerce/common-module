@@ -1,4 +1,4 @@
-module backend/common
+module github.com/letcommerce/common-module
 
 go 1.17
 
