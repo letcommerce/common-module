@@ -6,6 +6,7 @@ import (
 
 type Response struct {
 	Message string `json:"message" example:"Successfully added!"`
+	ID      uint   `json:"id;omitempty" example:"1"` // the effected ID
 }
 
 type StatusResponse struct {
@@ -14,6 +15,7 @@ type StatusResponse struct {
 
 type ErrorResponse struct {
 	Message string `json:"message" example:"Error details"`
+	Error   string `json:"error;omitempty"`
 }
 
 func ErrorResponseF(format string, a ...interface{}) ErrorResponse {
