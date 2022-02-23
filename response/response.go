@@ -14,8 +14,9 @@ type StatusResponse struct {
 }
 
 type ErrorResponse struct {
-	Message string `json:"message" example:"Error details"`
-	Error   string `json:"error,omitempty"`
+	Message      string `json:"message" example:"Error details"`
+	Error        string `json:"error,omitempty"`
+	ErrorDetails string `json:"error_details,omitempty"`
 }
 
 func ErrorResponseF(format string, a ...interface{}) ErrorResponse {
