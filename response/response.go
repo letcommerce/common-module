@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	requestid "github.com/sumit-tembe/gin-requestid"
 	"os"
 	"strings"
 )
@@ -54,7 +53,8 @@ func tryGetStackTrace(message string, err error) string {
 	p, _ := os.Getwd()
 
 	var errorDetails string
-	stackTrace := strings.ReplaceAll(fmt.Sprintf("%+v", err), p, "") // removing the working directory to make it more readable
+	stackTrace := strings.ReplaceAll(fmt.Sprintf("%+v", err), p, "")                       // removing the working directory to make it more readable
+	stackTrace = strings.ReplaceAll(stackTrace, "/go/pkg/mod/github.com/letcommerce/", "") // remove common package path
 	if stackTrace != "" {
 		split := strings.Split(stackTrace, "\n")
 		if len(split) > 6 {
@@ -64,7 +64,7 @@ func tryGetStackTrace(message string, err error) string {
 		}
 	}
 	if errorDetails != "" {
-		log.Errorf("Returning error while handling URL: [%v] %v. Message: [%v], Error: [%v], StackTrace: [%v] [%v]", ctx.Request.Method, ctx.Request.RequestURI, message, err.Error(), errorDetails, requestid.GetRequestIDFromContext(ctx))
+		log.Errorf("Got error while handling URL: [%v] %v Message: %v, Error: %v, StackTrace: %v", ctx.Request.Method, ctx.Request.RequestURI, message, err.Error(), errorDetails)
 	}
 	return errorDetails
 }

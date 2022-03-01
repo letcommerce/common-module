@@ -31,8 +31,7 @@ func LogErrorResponse(ctx *gin.Context) {
 	statusCode := ctx.Writer.Status()
 	if statusCode >= 400 {
 		// Record the response body if there was an error
-		requestId := requestid.GetRequestIDFromContext(ctx)
-		log.Errorf("Got Error Response while handling URI: [%v] %v - Response Body is: [%v] %v. [%v]", ctx.Request.Method, ctx.Request.RequestURI, statusCode, blw.body.String(), requestId)
+		log.Warnf("Returning error status code [%v] for request: [%v] %v - Response Body is: %v.", statusCode, ctx.Request.Method, ctx.Request.RequestURI, blw.body.String())
 	}
 }
 

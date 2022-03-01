@@ -56,5 +56,6 @@ func (f *PlainFormatter) Format(entry *log.Entry) ([]byte, error) {
 
 func Caller(f *runtime.Frame) string {
 	p, _ := os.Getwd()
-	return fmt.Sprintf("%s:%d", strings.TrimPrefix(f.File, p), f.Line)
+	packageName := "/go/pkg/mod/github.com/letcommerce/"
+	return fmt.Sprintf("%s:%d", strings.TrimPrefix(strings.TrimPrefix(f.File, p), packageName), f.Line)
 }
