@@ -39,7 +39,7 @@ func LogErrorResponse(ctx *gin.Context) {
 func InitGinCtx(ctx *gin.Context) {
 	ginutils.Init(ctx)
 	response.Init(ctx)
-	logs.SetRequestId(requestid.GetRequestIDFromContext(ctx))
+	logs.SetRequestId(ctx)
 	ctx.Next()
 }
 

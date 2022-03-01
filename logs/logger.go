@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	requestid "github.com/sumit-tembe/gin-requestid"
 	"io"
 	"os"
 	"runtime"
@@ -14,11 +15,11 @@ var (
 	LogWriter   io.Writer
 	ServiceName string
 	Env         string
-	RequestId   string
+	ctx         *gin.Context
 )
 
-func SetRequestId(requestId string) {
-	RequestId = requestId
+func SetRequestId(ginCtx *gin.Context) {
+	ctx = ginCtx
 }
 
 func InitLogger(path string, env string, serviceName string) {
@@ -46,7 +47,7 @@ type PlainFormatter struct {
 
 func (f *PlainFormatter) Format(entry *log.Entry) ([]byte, error) {
 	timestamp := fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
-	return []byte(fmt.Sprintf("[%s] [%s] - %s [%v] [%v:%v-%v]\n", f.LevelDesc[entry.Level], timestamp, entry.Message, RequestId, ServiceName, Env, Caller(entry.Caller))), nil
+	return []byte(fmt.Sprintf("[%s] [%s] - %s [%v] [%v:%v - %v]\n", f.LevelDesc[entry.Level], timestamp, entry.Message, requestid.GetRequestIDFromContext(ctx), ServiceName, Env, Caller(entry.Caller))), nil
 }
 
 func Caller(f *runtime.Frame) string {
