@@ -5,6 +5,7 @@ package middlewares
 import (
 	"bytes"
 	"github.com/gin-gonic/gin"
+	"github.com/letcommerce/common-module/response"
 	ginutils "github.com/letcommerce/common-module/utils"
 	log "github.com/sirupsen/logrus"
 	requestid "github.com/sumit-tembe/gin-requestid"
@@ -36,6 +37,7 @@ func LogErrorResponse(ctx *gin.Context) {
 
 func InitGinUtils(ctx *gin.Context) {
 	ginutils.Init(ctx)
+	response.Init(ctx)
 	ctx.Next()
 }
 
