@@ -5,6 +5,7 @@ package middlewares
 import (
 	"bytes"
 	"github.com/gin-gonic/gin"
+	ginutils "github.com/letcommerce/common-module/utils"
 	log "github.com/sirupsen/logrus"
 	requestid "github.com/sumit-tembe/gin-requestid"
 	"io"
@@ -24,6 +25,7 @@ func (w bodyLogWriter) Write(b []byte) (int, error) {
 func LogErrorResponse(ctx *gin.Context) {
 	blw := &bodyLogWriter{body: bytes.NewBufferString(""), ResponseWriter: ctx.Writer}
 	ctx.Writer = blw
+	ginutils.Init(ctx)
 	ctx.Next()
 	statusCode := ctx.Writer.Status()
 	if statusCode >= 400 {

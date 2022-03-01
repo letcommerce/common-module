@@ -8,26 +8,26 @@ import (
 	"strconv"
 )
 
-type GinUtils struct {
+var (
 	ctx *gin.Context
-}
+)
 
-func NewGinUtils(ctx *gin.Context) GinUtils {
-	return GinUtils{ctx}
+func Init(ginCtx *gin.Context) {
+	ctx = ginCtx
 }
 
 // GetIntParam method binds new int Param from ctx and return http.StatusBadRequest if it couldn't parse
-func (utils *GinUtils) GetIntParam(paramName string) (int, error) {
-	paramVal := utils.ctx.Params.ByName(paramName)
+func GetIntParam(paramName string) (int, error) {
+	paramVal := ctx.Params.ByName(paramName)
 	intParam, err := strconv.Atoi(paramVal)
 	if err != nil {
-		utils.ctx.JSON(http.StatusBadRequest, response.NewErrorResponseF(err, "can't bind param: %v to int (value = %v)", paramName, paramVal))
+		ctx.JSON(http.StatusBadRequest, response.NewErrorResponseF(err, "can't bind param: %v to int (value = %v)", paramName, paramVal))
 	}
 	return intParam, err
 }
 
 // GetUIntParam method binds new uint Param from ctx and return http.StatusBadRequest if it couldn't parse
-func GetUIntParam(ctx *gin.Context, paramName string) (uint, error) {
+func GetUIntParam(paramName string) (uint, error) {
 	paramVal := ctx.Params.ByName(paramName)
 	intParam, err := strconv.Atoi(paramVal)
 	if err != nil {
@@ -37,13 +37,13 @@ func GetUIntParam(ctx *gin.Context, paramName string) (uint, error) {
 }
 
 // GetStringParam method binds new string Param from ctx
-func GetStringParam(ctx *gin.Context, paramName string) string {
+func GetStringParam(paramName string) string {
 	paramVal := ctx.Params.ByName(paramName)
 	return paramVal
 }
 
 // BindDTO method binds new DTO from ctx body
-func BindDTO[T any](ctx *gin.Context, dto T) (T, error) {
+func BindDTO[T any](dto T) (T, error) {
 	err := ctx.Bind(&dto)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.NewErrorResponse("Got error while binding dto", err))
@@ -56,7 +56,7 @@ type IValidatable interface {
 }
 
 // BindAndValidateDTO method binds new DTO from ctx body
-func BindAndValidateDTO[T IValidatable](ctx *gin.Context, dto T) (T, error) {
+func BindAndValidateDTO[T IValidatable](dto T) (T, error) {
 	var null T
 	err := ctx.Bind(&dto)
 	if err != nil {
@@ -71,7 +71,7 @@ func BindAndValidateDTO[T IValidatable](ctx *gin.Context, dto T) (T, error) {
 	return dto, err
 }
 
-func ReturnResultOrError(ctx *gin.Context, result interface{}, errMessage string, err error) {
+func ReturnResultOrError(result interface{}, errMessage string, err error) {
 	if err == nil {
 		ctx.JSON(http.StatusOK, result)
 	} else {
@@ -79,7 +79,7 @@ func ReturnResultOrError(ctx *gin.Context, result interface{}, errMessage string
 	}
 }
 
-func ReturnMessageResponseOrError(ctx *gin.Context, message string, errMessage string, err error) {
+func ReturnMessageResponseOrError(message string, errMessage string, err error) {
 	if err == nil {
 		ctx.JSON(http.StatusOK, response.Response{Message: message})
 	} else {
@@ -87,7 +87,7 @@ func ReturnMessageResponseOrError(ctx *gin.Context, message string, errMessage s
 	}
 }
 
-func ReturnMessageResponseWithIdOrError(ctx *gin.Context, message string, id uint, errMessage string, err error) {
+func ReturnMessageResponseWithIdOrError(message string, id uint, errMessage string, err error) {
 	if err == nil {
 		ctx.JSON(http.StatusOK, response.Response{Message: message, ID: id})
 	} else {
@@ -95,7 +95,7 @@ func ReturnMessageResponseWithIdOrError(ctx *gin.Context, message string, id uin
 	}
 }
 
-func CopyDTO[T any](ctx *gin.Context, to T, from interface{}, ignoreEmpty bool) (result T, err error) {
+func CopyDTO[T any](to T, from interface{}, ignoreEmpty bool) (result T, err error) {
 	var null T
 	if ignoreEmpty {
 		err = copier.CopyWithOption(&to, from, copier.Option{IgnoreEmpty: true})
