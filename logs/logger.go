@@ -47,7 +47,11 @@ type PlainFormatter struct {
 
 func (f *PlainFormatter) Format(entry *log.Entry) ([]byte, error) {
 	timestamp := fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
-	return []byte(fmt.Sprintf("[%s] [%s] - %s [%v] [%v:%v - %v]\n", f.LevelDesc[entry.Level], timestamp, entry.Message, requestid.GetRequestIDFromContext(ctx), ServiceName, Env, Caller(entry.Caller))), nil
+	var requestId string
+	if ctx != nil {
+		requestId = requestid.GetRequestIDFromContext(ctx)
+	}
+	return []byte(fmt.Sprintf("[%s] [%s] - %s [%v] [%v:%v - %v]\n", f.LevelDesc[entry.Level], timestamp, entry.Message, requestId, ServiceName, Env, Caller(entry.Caller))), nil
 }
 
 func Caller(f *runtime.Frame) string {
