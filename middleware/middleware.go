@@ -39,17 +39,24 @@ func InitGinUtils(ctx *gin.Context) {
 	ctx.Next()
 }
 
-func LogRequests() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		buf, _ := ioutil.ReadAll(ctx.Request.Body)
-		rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
-		rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf)) //We have to create a new Buffer, because rdr1 will be read.
+func LogAllRequests(ctx *gin.Context) {
+	buf, _ := ioutil.ReadAll(ctx.Request.Body)
+	rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
+	rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf)) //We have to create a new Buffer, because rdr1 will be read.
 
-		log.Infof("Got Reuqest for URI: [%v] [%v] - Params: %v, Body: %+v", ctx.Request.Method, ctx.Request.RequestURI, ctx.Params, readBody(rdr1)) // Print request body
+	log.Infof("Got Reuqest for URI: [%v] %v - Params: %v, Body: [%+v]. [%v]", ctx.Request.Method, ctx.Request.RequestURI, ctx.Params, readBody(rdr1), requestid.GetRequestIDFromContext(ctx)) // Print request body
+	ctx.Request.Body = rdr2
+	ctx.Next()
+}
 
-		ctx.Request.Body = rdr2
-		ctx.Next()
-	}
+func LogAllResponses(ctx *gin.Context) {
+	blw := &bodyLogWriter{body: bytes.NewBufferString(""), ResponseWriter: ctx.Writer}
+	ctx.Writer = blw
+	ctx.Next()
+	statusCode := ctx.Writer.Status()
+
+	requestId := requestid.GetRequestIDFromContext(ctx)
+	log.Infof("Got Response while handling URI: [%v] %v - Response Body is: [%v] %v. [%v]", ctx.Request.Method, ctx.Request.RequestURI, statusCode, blw.body.String(), requestId)
 }
 
 func readBody(reader io.Reader) string {
