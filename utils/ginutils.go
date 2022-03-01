@@ -1,4 +1,4 @@
-package utils
+package ginutils
 
 import (
 	"github.com/gin-gonic/gin"
@@ -8,12 +8,20 @@ import (
 	"strconv"
 )
 
+type GinUtils struct {
+	ctx *gin.Context
+}
+
+func NewGinUtils(ctx *gin.Context) GinUtils {
+	return GinUtils{ctx}
+}
+
 // GetIntParam method binds new int Param from ctx and return http.StatusBadRequest if it couldn't parse
-func GetIntParam(ctx *gin.Context, paramName string) (int, error) {
-	paramVal := ctx.Params.ByName(paramName)
+func (utils *GinUtils) GetIntParam(paramName string) (int, error) {
+	paramVal := utils.ctx.Params.ByName(paramName)
 	intParam, err := strconv.Atoi(paramVal)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.NewErrorResponseF(err, "can't bind param: %v to int (value = %v)", paramName, paramVal))
+		utils.ctx.JSON(http.StatusBadRequest, response.NewErrorResponseF(err, "can't bind param: %v to int (value = %v)", paramName, paramVal))
 	}
 	return intParam, err
 }
@@ -61,6 +69,14 @@ func BindAndValidateDTO[T IValidatable](ctx *gin.Context, dto T) (T, error) {
 		return null, err
 	}
 	return dto, err
+}
+
+func ReturnResultOrError(ctx *gin.Context, result interface{}, errMessage string, err error) {
+	if err == nil {
+		ctx.JSON(http.StatusOK, result)
+	} else {
+		ctx.JSON(http.StatusInternalServerError, response.NewErrorResponse(errMessage, err))
+	}
 }
 
 func ReturnMessageResponseOrError(ctx *gin.Context, message string, errMessage string, err error) {
