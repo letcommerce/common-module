@@ -4,6 +4,8 @@ go 1.18
 
 require (
 	github.com/gin-gonic/gin v1.7.7
+	github.com/jinzhu/copier v0.3.5
+	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/sumit-tembe/gin-requestid v0.0.0-20191217132119-618fbd2c6306
 	gorm.io/driver/postgres v1.3.1
@@ -24,7 +26,6 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/jackc/pgtype v1.9.1 // indirect
 	github.com/jackc/pgx/v4 v4.14.1 // indirect
-	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect

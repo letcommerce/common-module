@@ -11,10 +11,17 @@ import (
 )
 
 var (
-	LogWriter io.Writer
+	LogWriter   io.Writer
+	ServiceName string
+	Env         string
+	RequestId   string
 )
 
-func InitLogger(path string, env string) {
+func SetRequestId(requestId string) {
+	RequestId = requestId
+}
+
+func InitLogger(path string, env string, serviceName string) {
 	// Setting Gin Logger
 	f, err := os.Create(path)
 	if err != nil {
@@ -25,6 +32,8 @@ func InitLogger(path string, env string) {
 	if env != "local" {
 		gin.SetMode(gin.ReleaseMode)
 	}
+	Env = env
+	ServiceName = serviceName
 	log.SetReportCaller(true)
 	log.SetOutput(LogWriter)
 	log.SetFormatter(&PlainFormatter{TimestampFormat: "2006-01-02 15:04:05", LevelDesc: []string{"PANIC", "FATAL", "ERROR", "WARN", "INFO", "DEBUG"}})
@@ -37,7 +46,7 @@ type PlainFormatter struct {
 
 func (f *PlainFormatter) Format(entry *log.Entry) ([]byte, error) {
 	timestamp := fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
-	return []byte(fmt.Sprintf("[%s] [%s] - %s [%v]\n", f.LevelDesc[entry.Level], timestamp, entry.Message, Caller(entry.Caller))), nil
+	return []byte(fmt.Sprintf("[%s] [%s] - %s [%v] [%v:%v-%v]\n", f.LevelDesc[entry.Level], timestamp, entry.Message, RequestId, ServiceName, Env, Caller(entry.Caller))), nil
 }
 
 func Caller(f *runtime.Frame) string {
