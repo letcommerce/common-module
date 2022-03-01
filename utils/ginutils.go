@@ -51,6 +51,16 @@ func BindDTO[T any](dto T) (T, error) {
 	return dto, err
 }
 
+// BindMap method binds new map from ctx body
+func BindMap() (map[string]interface{}, error) {
+	var dto map[string]interface{}
+	err := ctx.Bind(&dto)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.NewErrorResponse("Got error while binding map", err))
+	}
+	return dto, err
+}
+
 type IValidatable interface {
 	Validate() error
 }

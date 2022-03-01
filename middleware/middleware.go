@@ -25,7 +25,6 @@ func (w bodyLogWriter) Write(b []byte) (int, error) {
 func LogErrorResponse(ctx *gin.Context) {
 	blw := &bodyLogWriter{body: bytes.NewBufferString(""), ResponseWriter: ctx.Writer}
 	ctx.Writer = blw
-	ginutils.Init(ctx)
 	ctx.Next()
 	statusCode := ctx.Writer.Status()
 	if statusCode >= 400 {
@@ -35,13 +34,18 @@ func LogErrorResponse(ctx *gin.Context) {
 	}
 }
 
-func RequestLogger() gin.HandlerFunc {
+func InitGinUtils(ctx *gin.Context) {
+	ginutils.Init(ctx)
+	ctx.Next()
+}
+
+func LogRequests() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		buf, _ := ioutil.ReadAll(ctx.Request.Body)
 		rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
 		rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf)) //We have to create a new Buffer, because rdr1 will be read.
 
-		log.Debugf("Got Reuqest for URI: [%v] [%v] - ", ctx.Request.Method, ctx.Request.RequestURI, readBody(rdr1)) // Print request body
+		log.Infof("Got Reuqest for URI: [%v] [%v] - Params: %v, Body: %+v", ctx.Request.Method, ctx.Request.RequestURI, ctx.Params, readBody(rdr1)) // Print request body
 
 		ctx.Request.Body = rdr2
 		ctx.Next()
