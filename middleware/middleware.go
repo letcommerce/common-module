@@ -5,9 +5,9 @@ package middlewares
 import (
 	"bytes"
 	"github.com/gin-gonic/gin"
+	"github.com/letcommerce/common-module/ginutils"
 	"github.com/letcommerce/common-module/logs"
 	"github.com/letcommerce/common-module/response"
-	ginutils "github.com/letcommerce/common-module/utils"
 	log "github.com/sirupsen/logrus"
 	requestid "github.com/sumit-tembe/gin-requestid"
 	"io"
