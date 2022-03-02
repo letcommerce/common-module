@@ -18,12 +18,17 @@ var (
 	ctx         *gin.Context
 )
 
+const defaultLogPath = "logs/gin.log"
+
 func SetRequestId(ginCtx *gin.Context) {
 	ctx = ginCtx
 }
 
 func InitLogger(path string, env string, serviceName string) {
 	// Setting Gin Logger
+	if path == "" {
+		path = defaultLogPath
+	}
 	f, err := os.Create(path)
 	if err != nil {
 		log.Panicf("can't open log file: gin.log, error: %s", err)
@@ -51,11 +56,12 @@ func (f *PlainFormatter) Format(entry *log.Entry) ([]byte, error) {
 	if ctx != nil {
 		requestId = requestid.GetRequestIDFromContext(ctx)
 	}
-	return []byte(fmt.Sprintf("[%s] [%s] - %s [%v] [%v:%v - %v]\n", f.LevelDesc[entry.Level], timestamp, entry.Message, requestId, ServiceName, Env, Caller(entry.Caller))), nil
+	return []byte(fmt.Sprintf("[%s] [%s] - %s [%v:%v:%v - %v]\n", f.LevelDesc[entry.Level], timestamp, entry.Message, ServiceName, Env, requestId, Caller(entry.Caller))), nil
 }
 
 func Caller(f *runtime.Frame) string {
 	p, _ := os.Getwd()
-	packageName := "/go/pkg/mod/github.com/letcommerce/"
-	return fmt.Sprintf("%s:%d", strings.TrimPrefix(strings.TrimPrefix(f.File, p), packageName), f.Line)
+	fileName := strings.TrimPrefix(f.File, p)
+	fileName = strings.ReplaceAll(fileName, "/go/pkg/mod/github.com/letcommerce/", "")
+	return fmt.Sprintf("%s:%d", fileName, f.Line)
 }

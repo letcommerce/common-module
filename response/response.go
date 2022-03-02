@@ -64,7 +64,7 @@ func tryGetStackTrace(message string, err error) string {
 		}
 	}
 	if errorDetails != "" {
-		log.Errorf("Got error while handling URL: [%v] %v Message: %v, Error: %v, StackTrace: %v", ctx.Request.Method, ctx.Request.RequestURI, message, err.Error(), errorDetails)
+		log.Errorf("Got error while handling request: [%v] %v, Message: %v, Error: %v, StackTrace: %v", ctx.Request.Method, ctx.Request.RequestURI, message, err.Error(), errorDetails)
 	}
 	return errorDetails
 }

@@ -1,6 +1,7 @@
 package db
 
 import (
+	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -12,9 +13,9 @@ var (
 )
 
 // ConnectAndMigrate connects to PostgresDB
-func ConnectAndMigrate(dsn string, schema string, dst ...interface{}) *gorm.DB {
-	connectToPublicSchema(dst, dsn)
-	db := connectToServiceSchema(dst, schema, dsn)
+func ConnectAndMigrate(dsn string, schema string, useCloudSql bool, dst ...interface{}) *gorm.DB {
+	connectToPublicSchema(dst, dsn, useCloudSql)
+	db := connectToServiceSchema(dst, schema, dsn, useCloudSql)
 
 	log.Info("Postgres connected successfully.")
 
@@ -22,9 +23,14 @@ func ConnectAndMigrate(dsn string, schema string, dst ...interface{}) *gorm.DB {
 	return db
 }
 
-func connectToServiceSchema(dst []interface{}, schemaName string, dsn string) *gorm.DB {
+func connectToServiceSchema(dst []interface{}, schemaName string, dsn string, useCloudSql bool) *gorm.DB {
 	log.Infof("Start Connecting to Postgres DB, schema: %v", schemaName)
+	driverName := ""
+	if useCloudSql {
+		driverName = "cloudsqlpostgres"
+	}
 	db, err := gorm.Open(postgres.New(postgres.Config{
+		DriverName:           driverName,
 		DSN:                  dsn,
 		PreferSimpleProtocol: true, // disables implicit prepared statement usage
 	}), &gorm.Config{NamingStrategy: schema.NamingStrategy{
@@ -45,9 +51,14 @@ func connectToServiceSchema(dst []interface{}, schemaName string, dsn string) *g
 	return db
 }
 
-func connectToPublicSchema(dst []interface{}, dsn string) {
+func connectToPublicSchema(dst []interface{}, dsn string, useCloudSql bool) {
 	log.Infof("Start Connecting to Postgres DB, public schema")
+	driverName := ""
+	if useCloudSql {
+		driverName = "cloudsqlpostgres"
+	}
 	db, err := gorm.Open(postgres.New(postgres.Config{
+		DriverName:           driverName,
 		DSN:                  dsn,
 		PreferSimpleProtocol: true, // disables implicit prepared statement usage
 	}))
