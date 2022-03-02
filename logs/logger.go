@@ -18,7 +18,7 @@ var (
 	ctx         *gin.Context
 )
 
-const defaultLogPath = "logs/gin.log"
+const defaultLogPath = "gin.log"
 
 func SetRequestId(ginCtx *gin.Context) {
 	ctx = ginCtx
