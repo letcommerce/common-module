@@ -42,7 +42,7 @@ func InitLogger(path string, env string, serviceName string) {
 	ServiceName = serviceName
 	log.SetReportCaller(true)
 	log.SetOutput(LogWriter)
-	log.SetFormatter(&PlainFormatter{TimestampFormat: "2006-01-02 15:04:05", LevelDesc: []string{"CRITICAL", "CRITICAL", "ERROR", "WARN", "INFO", "DEBUG"}})
+	log.SetFormatter(&PlainFormatter{TimestampFormat: "2006-01-02 15:04:05", LevelDesc: []string{"ERROR", "ERROR", "ERROR", "WARN", "INFO", "DEBUG"}})
 }
 
 type PlainFormatter struct {
