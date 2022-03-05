@@ -45,7 +45,7 @@ func InitLogger(path string, env string, serviceName string) {
 	log.SetReportCaller(true)
 	log.SetOutput(LogWriter)
 	if env == "prod" {
-		log.SetFormatter(&JsonFormatter{TimestampFormat: "2006-01-02 15:04:05", LevelDesc: []string{"ERROR", "ERROR", "ERROR", "WARN", "INFO", "DEBUG"}})
+		log.SetFormatter(&JsonFormatter{TimestampFormat: "2006-01-02 15:04:05", LevelDesc: []string{"CRITICAL", "CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"}})
 	} else {
 		log.SetFormatter(&PlainFormatter{TimestampFormat: "2006-01-02 15:04:05", LevelDesc: []string{"PANIC", "FATAL", "ERROR", "WARN", "INFO", "DEBUG"}})
 	}
@@ -91,7 +91,8 @@ func (f *JsonFormatter) Format(entry *log.Entry) ([]byte, error) {
 		}
 		result["file"] = file
 	}
-	result["level"] = f.LevelDesc[entry.Level]
+	result["level"] = entry.Level.String()
+	result["severity"] = f.LevelDesc[entry.Level]
 	result["service"] = ServiceName
 	result["env"] = Env
 	if ctx != nil {
