@@ -99,12 +99,21 @@ func (f *JsonFormatter) Format(entry *log.Entry) ([]byte, error) {
 	}
 	result["level"] = entry.Level.String()
 	result["severity"] = f.LevelDesc[entry.Level]
-	result["service"] = ServiceName
+	result["serviceName"] = ServiceName
 	result["env"] = Env
 	if ctx != nil {
 		requestId := requestid.GetRequestIDFromContext(ctx)
 		result["request_id"] = requestId
 		result["spanId"] = requestId
+
+		httpRequest := map[string]interface{}{}
+		httpRequest["requestMethod"] = ctx.Request.Method
+		httpRequest["requestUrl"] = ctx.Request.RequestURI
+		if ctx.Request.Response != nil {
+			httpRequest["status"] = ctx.Request.Response.Status
+		}
+		httpRequest["remoteIp"] = ctx.Request.RemoteAddr
+		result["httpRequest"] = httpRequest
 	}
 	b := &bytes.Buffer{}
 	encoder := json.NewEncoder(b)
