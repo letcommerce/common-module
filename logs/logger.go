@@ -1,6 +1,8 @@
 package logs
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -42,7 +44,11 @@ func InitLogger(path string, env string, serviceName string) {
 	ServiceName = serviceName
 	log.SetReportCaller(true)
 	log.SetOutput(LogWriter)
-	log.SetFormatter(&PlainFormatter{TimestampFormat: "2006-01-02 15:04:05", LevelDesc: []string{"ERROR", "ERROR", "ERROR", "WARN", "INFO", "DEBUG"}})
+	if env == "prod" {
+		log.SetFormatter(&JsonFormatter{TimestampFormat: "2006-01-02 15:04:05", LevelDesc: []string{"PANIC", "FATAL", "ERROR", "WARN", "INFO", "DEBUG"}})
+	} else {
+		log.SetFormatter(&PlainFormatter{TimestampFormat: "2006-01-02 15:04:05", LevelDesc: []string{"PANIC", "FATAL", "ERROR", "WARN", "INFO", "DEBUG"}})
+	}
 }
 
 type PlainFormatter struct {
@@ -64,4 +70,50 @@ func Caller(f *runtime.Frame) string {
 	fileName := strings.TrimPrefix(f.File, p)
 	fileName = strings.ReplaceAll(fileName, "/go/pkg/mod/github.com/letcommerce/", "")
 	return fmt.Sprintf("%s:%d", fileName, f.Line)
+}
+
+type JsonFormatter struct {
+	TimestampFormat   string
+	LevelDesc         []string
+	PrettyPrint       bool
+	DisableHTMLEscape bool
+}
+
+func (f *JsonFormatter) Format(entry *log.Entry) ([]byte, error) {
+	result := map[string]interface{}{}
+
+	result["time"] = fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
+	result["msg"] = entry.Message
+	if entry.HasCaller() {
+		function, file := CallerWithFunc(entry.Caller)
+		if function != "" {
+			result["func"] = function
+		}
+		result["file"] = file
+	}
+	result["level"] = f.LevelDesc[entry.Level]
+	result["service"] = ServiceName
+	result["env"] = Env
+	if ctx != nil {
+		requestId := requestid.GetRequestIDFromContext(ctx)
+		result["request_id"] = requestId
+	}
+	b := &bytes.Buffer{}
+	encoder := json.NewEncoder(b)
+	encoder.SetEscapeHTML(!f.DisableHTMLEscape)
+	if f.PrettyPrint {
+		encoder.SetIndent("", "  ")
+	}
+	if err := encoder.Encode(result); err != nil {
+		return nil, fmt.Errorf("failed to marshal fields to JSON, %w", err)
+	}
+
+	return b.Bytes(), nil
+}
+
+func CallerWithFunc(f *runtime.Frame) (string, string) {
+	p, _ := os.Getwd()
+	fileName := strings.TrimPrefix(f.File, p)
+	fileName = strings.ReplaceAll(fileName, "/go/pkg/mod/github.com/letcommerce/", "")
+	return f.Func.Name(), fmt.Sprintf("%s:%d", fileName, f.Line)
 }
