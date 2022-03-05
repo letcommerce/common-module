@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -82,14 +83,19 @@ type JsonFormatter struct {
 func (f *JsonFormatter) Format(entry *log.Entry) ([]byte, error) {
 	result := map[string]interface{}{}
 
-	result["time"] = fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
-	result["msg"] = entry.Message
+	result["timestamp"] = fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
+	result["message"] = entry.Message
 	if entry.HasCaller() {
-		function, file := CallerWithFunc(entry.Caller)
+		source := map[string]interface{}{}
+
+		function, file, line := CallerWithFunc(entry.Caller)
 		if function != "" {
-			result["func"] = function
+			source["function"] = function
 		}
-		result["file"] = file
+		source["line"] = line
+		source["file"] = file
+
+		result["sourceLocation"] = source
 	}
 	result["level"] = entry.Level.String()
 	result["severity"] = f.LevelDesc[entry.Level]
@@ -98,6 +104,7 @@ func (f *JsonFormatter) Format(entry *log.Entry) ([]byte, error) {
 	if ctx != nil {
 		requestId := requestid.GetRequestIDFromContext(ctx)
 		result["request_id"] = requestId
+		result["spanId"] = requestId
 	}
 	b := &bytes.Buffer{}
 	encoder := json.NewEncoder(b)
@@ -112,9 +119,9 @@ func (f *JsonFormatter) Format(entry *log.Entry) ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-func CallerWithFunc(f *runtime.Frame) (string, string) {
+func CallerWithFunc(f *runtime.Frame) (string, string, string) {
 	p, _ := os.Getwd()
 	fileName := strings.TrimPrefix(f.File, p)
 	fileName = strings.ReplaceAll(fileName, "/go/pkg/mod/github.com/letcommerce/", "")
-	return f.Func.Name(), fmt.Sprintf("%s:%d", fileName, f.Line)
+	return f.Func.Name(), fileName, strconv.Itoa(f.Line)
 }
