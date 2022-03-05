@@ -38,7 +38,7 @@ func connectToServiceSchema(dst []interface{}, schemaName string, dsn string, us
 		SingularTable: false,
 	}})
 	if err != nil {
-		log.Panicf("Can't connect to postgres service scehma: %v", err.Error())
+		log.Panicf("Can't connect to postgres DB on service scehma. error is: %v", err.Error())
 	}
 
 	db.Exec("CREATE SCHEMA IF NOT EXISTS " + schemaName)
@@ -46,7 +46,7 @@ func connectToServiceSchema(dst []interface{}, schemaName string, dsn string, us
 	log.Info("Start Auto Migrating on service schema")
 	err = db.AutoMigrate(dst...)
 	if err != nil {
-		log.Panicf("Failed to auto migrate: %v", err.Error())
+		log.Panicf("Failed to auto migrate on service schema. eror is: %v", err.Error())
 	}
 	return db
 }
@@ -63,12 +63,12 @@ func connectToPublicSchema(dst []interface{}, dsn string, useCloudSql bool) {
 		PreferSimpleProtocol: true, // disables implicit prepared statement usage
 	}))
 	if err != nil {
-		log.Panicf("Can't connect to postgres public schema: %v", err.Error())
+		log.Panicf("Can't connect to postgres DB on public schema. error is: %v", err.Error())
 	}
 
 	log.Info("Start Auto Migrating to public schema")
 	err = db.AutoMigrate(dst...)
 	if err != nil {
-		log.Panicf("Failed to auto migrate on public schema: %v", err.Error())
+		log.Panicf("Failed to auto migrate DB on public schema. error is: %v", err.Error())
 	}
 }
