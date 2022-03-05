@@ -45,7 +45,7 @@ func InitLogger(path string, env string, serviceName string) {
 	log.SetReportCaller(true)
 	log.SetOutput(LogWriter)
 	if env == "prod" {
-		log.SetFormatter(&JsonFormatter{TimestampFormat: "2006-01-02 15:04:05", LevelDesc: []string{"PANIC", "FATAL", "ERROR", "WARN", "INFO", "DEBUG"}})
+		log.SetFormatter(&JsonFormatter{TimestampFormat: "2006-01-02 15:04:05", LevelDesc: []string{"ERROR", "ERROR", "ERROR", "WARN", "INFO", "DEBUG"}})
 	} else {
 		log.SetFormatter(&PlainFormatter{TimestampFormat: "2006-01-02 15:04:05", LevelDesc: []string{"PANIC", "FATAL", "ERROR", "WARN", "INFO", "DEBUG"}})
 	}
