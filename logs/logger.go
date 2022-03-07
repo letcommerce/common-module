@@ -84,7 +84,6 @@ func (f *JsonFormatter) Format(entry *log.Entry) ([]byte, error) {
 	result := map[string]interface{}{}
 
 	result["timestamp"] = fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
-	result["message"] = entry.Message
 	if entry.HasCaller() {
 		source := map[string]interface{}{}
 
@@ -101,8 +100,10 @@ func (f *JsonFormatter) Format(entry *log.Entry) ([]byte, error) {
 	result["severity"] = f.LevelDesc[entry.Level]
 	result["serviceName"] = ServiceName
 	result["env"] = Env
+
+	requestId := ""
 	if ctx != nil {
-		requestId := requestid.GetRequestIDFromContext(ctx)
+		requestId = requestid.GetRequestIDFromContext(ctx)
 		result["request_id"] = requestId
 		result["spanId"] = requestId
 
@@ -115,6 +116,8 @@ func (f *JsonFormatter) Format(entry *log.Entry) ([]byte, error) {
 		httpRequest["remoteIp"] = ctx.Request.RemoteAddr
 		result["httpRequest"] = httpRequest
 	}
+	result["message"] = fmt.Sprintf("%s [%v:%v:%v - %v]", entry.Message, ServiceName, Env, requestId, Caller(entry.Caller))
+
 	b := &bytes.Buffer{}
 	encoder := json.NewEncoder(b)
 	encoder.SetEscapeHTML(!f.DisableHTMLEscape)
