@@ -4,9 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"github.com/letcommerce/common-module/response"
+	"github.com/letcommerce/common-module/utils/dates"
 	"github.com/pkg/errors"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 var (
@@ -35,6 +37,13 @@ func GetUIntParam(paramName string) (uint, error) {
 		ctx.JSON(http.StatusBadRequest, response.NewErrorResponseF(errors.WithStack(err), "can't bind param: %v to uint (value = %v)", paramName, paramVal))
 	}
 	return uint(intParam), err
+}
+
+// GetDateParam method binds date string Param from ctx (in format: "2006-01-15")
+func GetDateParam(paramName string) (time.Time, error) {
+	paramVal := ctx.Params.ByName(paramName)
+	date, err := dates.ParseDate(paramVal)
+	return date, err
 }
 
 // GetStringParam method binds new string Param from ctx

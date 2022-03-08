@@ -1,4 +1,4 @@
-package utils
+package conditions
 
 // IfThen evaluates a condition, if true returns the parameters otherwise nil
 func IfThen[T any](condition bool, a T) T {

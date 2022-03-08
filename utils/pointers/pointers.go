@@ -1,4 +1,4 @@
-package utils
+package pointers
 
 func ToPtr[T any](source T) *T {
 	return &source
