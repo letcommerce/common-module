@@ -10,7 +10,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/sumit-tembe/gin-requestid v0.0.0-20191217132119-618fbd2c6306
 	gorm.io/driver/postgres v1.3.1
-	gorm.io/gorm v1.23.1
+	gorm.io/gorm v1.23.2
 )
 
 require (

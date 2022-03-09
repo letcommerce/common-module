@@ -93,6 +93,16 @@ func GetStringQuery(paramName string) (string, bool) {
 	return ctx.GetQuery(paramName)
 }
 
+// GetBoolQuery method binds bool string Param from ctx query (example: "true")
+func GetBoolQuery(paramName string) (bool, bool, error) {
+	paramVal, exists := ctx.GetQuery(paramName)
+	if exists {
+		result, err := strconv.ParseBool(paramVal)
+		return result, exists, err
+	}
+	return false, exists, nil
+}
+
 // BindDTO method binds new DTO from ctx body
 func BindDTO[T any](dto T) (T, error) {
 	err := ctx.Bind(&dto)
