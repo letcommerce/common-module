@@ -39,6 +39,32 @@ func GetUIntParam(paramName string) (uint, error) {
 	return uint(intParam), err
 }
 
+// GetIntQuery method binds new int Param from ctx query and return http.StatusBadRequest if it couldn't parse
+func GetIntQuery(paramName string) (int, bool, error) {
+	paramVal, exists := ctx.GetQuery(paramName)
+	if exists {
+		intParam, err := strconv.Atoi(paramVal)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, response.NewErrorResponseF(errors.WithStack(err), "can't bind param: %v to int (value = %v)", paramName, paramVal))
+		}
+		return intParam, exists, err
+	}
+	return 0, exists, nil
+}
+
+// GetUIntQuery method binds new uint Param from ctx query and return http.StatusBadRequest if it couldn't parse
+func GetUIntQuery(paramName string) (uint, bool, error) {
+	paramVal, exists := ctx.GetQuery(paramName)
+	if exists {
+		intParam, err := strconv.Atoi(paramVal)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, response.NewErrorResponseF(errors.WithStack(err), "can't bind param: %v to uint (value = %v)", paramName, paramVal))
+		}
+		return uint(intParam), exists, err
+	}
+	return 0, exists, nil
+}
+
 // GetDateParam method binds date string Param from ctx (in format: "2006-01-15")
 func GetDateParam(paramName string) (time.Time, error) {
 	paramVal := ctx.Params.ByName(paramName)
@@ -46,10 +72,25 @@ func GetDateParam(paramName string) (time.Time, error) {
 	return date, err
 }
 
+// GetDateQuery method binds date string Param from ctx (in format: "2006-01-15")
+func GetDateQuery(paramName string) (time.Time, bool, error) {
+	paramVal, exists := ctx.GetQuery(paramName)
+	if exists {
+		date, err := dates.ParseDate(paramVal)
+		return date, exists, err
+	}
+	return time.Time{}, exists, nil
+}
+
 // GetStringParam method binds new string Param from ctx
 func GetStringParam(paramName string) string {
 	paramVal := ctx.Params.ByName(paramName)
 	return paramVal
+}
+
+// GetStringQuery method binds new string Query from ctx
+func GetStringQuery(paramName string) (string, bool) {
+	return ctx.GetQuery(paramName)
 }
 
 // BindDTO method binds new DTO from ctx body
