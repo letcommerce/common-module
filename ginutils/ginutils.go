@@ -42,7 +42,7 @@ func GetUIntParam(paramName string) (uint, error) {
 // GetIntQuery method binds new int Param from ctx query and return http.StatusBadRequest if it couldn't parse
 func GetIntQuery(paramName string) (int, bool, error) {
 	paramVal, exists := ctx.GetQuery(paramName)
-	if exists {
+	if exists && paramVal != "null" {
 		intParam, err := strconv.Atoi(paramVal)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, response.NewErrorResponseF(errors.WithStack(err), "can't bind param: %v to int (value = %v)", paramName, paramVal))
@@ -55,7 +55,7 @@ func GetIntQuery(paramName string) (int, bool, error) {
 // GetUIntQuery method binds new uint Param from ctx query and return http.StatusBadRequest if it couldn't parse
 func GetUIntQuery(paramName string) (uint, bool, error) {
 	paramVal, exists := ctx.GetQuery(paramName)
-	if exists {
+	if exists && paramVal != "null" {
 		intParam, err := strconv.Atoi(paramVal)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, response.NewErrorResponseF(errors.WithStack(err), "can't bind param: %v to uint (value = %v)", paramName, paramVal))
@@ -75,7 +75,7 @@ func GetDateParam(paramName string) (time.Time, error) {
 // GetDateQuery method binds date string Param from ctx (in format: "2006-01-15")
 func GetDateQuery(paramName string) (time.Time, bool, error) {
 	paramVal, exists := ctx.GetQuery(paramName)
-	if exists {
+	if exists && paramVal != "null" {
 		date, err := dates.ParseDate(paramVal)
 		return date, exists, err
 	}
@@ -90,13 +90,17 @@ func GetStringParam(paramName string) string {
 
 // GetStringQuery method binds new string Query from ctx
 func GetStringQuery(paramName string) (string, bool) {
-	return ctx.GetQuery(paramName)
+	paramVal, exists := ctx.GetQuery(paramName)
+	if paramVal == "null" {
+		return "", false
+	}
+	return paramVal, exists
 }
 
 // GetBoolQuery method binds bool string Param from ctx query (example: "true")
 func GetBoolQuery(paramName string) (bool, bool, error) {
 	paramVal, exists := ctx.GetQuery(paramName)
-	if exists {
+	if exists && paramVal != "null" {
 		result, err := strconv.ParseBool(paramVal)
 		return result, exists, err
 	}
