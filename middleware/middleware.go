@@ -4,6 +4,7 @@ package middlewares
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/letcommerce/common-module/ginutils"
 	"github.com/letcommerce/common-module/logs"
@@ -12,6 +13,7 @@ import (
 	requestid "github.com/sumit-tembe/gin-requestid"
 	"io"
 	"io/ioutil"
+	"net/http"
 )
 
 type bodyLogWriter struct {
@@ -68,4 +70,10 @@ func readBody(reader io.Reader) string {
 
 	s := buf.String()
 	return s
+}
+
+func RecoveryHandler(c *gin.Context, err interface{}) {
+	log.Errorf("Got panic while handling [%v] %v: %+v", c.Request.Method, c.Request.RequestURI, err)
+
+	c.JSON(http.StatusInternalServerError, response.ErrorResponse{Message: "got panic", Error: fmt.Sprintf("%v", err)})
 }
